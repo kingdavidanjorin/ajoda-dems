@@ -1,7 +1,8 @@
 <?php
 
 declare(strict_types=1);
+use Tests\TestCase;
 
 pest()
-    ->extend(Tests\TestCase::class)
+    ->extend(TestCase::class)
     ->in('Feature');
