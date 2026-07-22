@@ -6,6 +6,7 @@ namespace App\Actions\Fortify;
 
 use App\Enums\AccountStatus;
 use App\Enums\AccountType;
+use App\Enums\RoleName;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -48,6 +49,8 @@ final class CreateNewUser implements CreatesNewUsers
             $user->customerProfile()->create([
                 'country' => 'Nigeria',
             ]);
+
+            $user->assignRole(RoleName::Customer->value);
 
             return $user;
         });
