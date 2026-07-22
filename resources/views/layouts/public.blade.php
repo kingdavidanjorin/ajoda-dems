@@ -50,14 +50,14 @@
                 </a>
 
                 <a
-                    href="#homes"
+                    href="{{ route('properties.index') }}"
                     class="text-stone-700 transition hover:text-emerald-700"
                 >
                     Properties
                 </a>
 
                 <a
-                    href="#about"
+                    href="{{ route('home') }}#about"
                     class="text-stone-700 transition hover:text-emerald-700"
                 >
                     About
@@ -148,14 +148,14 @@
                     </a>
 
                     <a
-                        href="#homes"
+                        href="{{ route('properties.index') }}"
                         class="hover:text-white"
                     >
                         Available properties
                     </a>
 
                     <a
-                        href="#about"
+                         href="{{ route('home') }}#about"
                         class="hover:text-white"
                     >
                         About the estate

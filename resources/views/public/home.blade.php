@@ -32,7 +32,7 @@
 
                 <div class="mt-10 flex flex-wrap gap-4">
                     <a
-                        href="#homes"
+                        href="{{ route('properties.index') }}"
                         class="rounded-xl bg-emerald-600 px-6 py-3.5 font-semibold text-white shadow-lg transition hover:bg-emerald-500"
                     >
                         Explore available homes
@@ -244,15 +244,26 @@
                                         {{ $house->estate->name }}
                                     </span>
 
-                                    <span class="text-sm font-bold text-emerald-700">
-                                        Details coming next
-                                    </span>
+                                    <a
+                                        href="{{ route('properties.show', $house) }}"
+                                        class="text-sm font-bold text-emerald-700 hover:text-emerald-900"
+                                    >
+                                         View property details &rarr;
+                                    </a>
                                 </div>
                             </div>
                         </article>
                     @endforeach
                 </div>
             @endif
+        </div>
+        <div class="mt-10 text-center">
+            <a
+                href="{{ route('properties.index') }}"
+                class="inline-flex rounded-xl bg-emerald-700 px-6 py-3.5 font-bold text-white transition hover:bg-emerald-800"
+            >
+                View complete property catalogue
+            </a>
         </div>
     </section>
 
