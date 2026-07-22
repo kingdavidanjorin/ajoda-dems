@@ -15,4 +15,24 @@ enum RoleName: string
     case DocumentOfficer = 'Document Officer';
     case SystemAdministrator = 'System Administrator';
     case ExecutiveManagement = 'Executive Management';
+
+    public static function assignableStaffValues(): array
+    {
+        return array_values(
+            array_map(
+                static fn (self $role): string => $role->value,
+                array_filter(
+                    self::cases(),
+                    static fn (self $role): bool => ! in_array(
+                        $role,
+                        [
+                            self::Customer,
+                            self::SystemAdministrator,
+                        ],
+                        true,
+                    ),
+                ),
+            ),
+        );
+    }
 }

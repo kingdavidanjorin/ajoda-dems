@@ -106,7 +106,7 @@
                         href="{{ route('dashboard') }}"
                         class="mt-9 flex w-full justify-center rounded-xl bg-emerald-500 px-6 py-3.5 font-bold text-white transition hover:bg-emerald-400"
                     >
-                        Open customer dashboard
+                        Open my portal
                     </a>
                 @endguest
 
