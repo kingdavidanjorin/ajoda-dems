@@ -4,47 +4,52 @@ declare(strict_types=1);
 
 namespace App\Actions\Fortify;
 
+use App\Enums\AccountStatus;
+use App\Enums\AccountType;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 final class CreateNewUser implements CreatesNewUsers
 {
+    use PasswordValidationRules;
+
     /**
-     * Validate and create a newly registered user.
+     * Validate and create a newly registered customer.
      *
-     * @param  array<string, mixed>  $input
+     * @param  array<string, string>  $input
      */
     public function create(array $input): User
     {
         Validator::make($input, [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
+            'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
                 'string',
-                'lowercase',
                 'email',
                 'max:255',
                 Rule::unique(User::class),
             ],
-            'password' => [
-                'required',
-                'confirmed',
-                Password::defaults(),
-            ],
+            'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create([
-            'name' => $input['name'],
-            'email' => $input['email'],
-            'password' => Hash::make($input['password']),
-        ]);
+        return DB::transaction(function () use ($input): User {
+            $user = User::create([
+                'name' => $input['name'],
+                'email' => $input['email'],
+                'password' => Hash::make($input['password']),
+                'account_type' => AccountType::Customer->value,
+                'account_status' => AccountStatus::Active->value,
+            ]);
+
+            $user->customerProfile()->create([
+                'country' => 'Nigeria',
+            ]);
+
+            return $user;
+        });
     }
 }
