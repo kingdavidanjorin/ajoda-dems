@@ -54,7 +54,6 @@ final class HandoverScheduledNotification extends Notification implements Should
             'property_code' => $propertyCode,
             'scheduled_at' =>
             $handover->scheduled_at->toIso8601String(),
-            'url' => route('customer.handovers.index'),
         ];
     }
 }

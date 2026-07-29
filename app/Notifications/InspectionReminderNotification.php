@@ -52,7 +52,6 @@ final class InspectionReminderNotification extends Notification implements Shoul
             'property_code' => $propertyCode,
             'scheduled_at' =>
             $inspection->scheduled_at->toIso8601String(),
-            'url' => route('customer.inspections.index'),
         ];
     }
 }

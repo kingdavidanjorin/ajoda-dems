@@ -1,14 +1,22 @@
+@php
+$pageTitle = trim(
+strip_tags(
+$__env->yieldContent(
+'title',
+'Staff Portal',
+),
+),
+);
+@endendphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>
-        @yield('title', 'Staff Portal') | {{ config('app.name') }}
+        {{ $pageTitle }} | {{ config('app.name') }}
     </title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -28,24 +36,20 @@
             </div>
 
             <nav class="space-y-2 px-4 py-6">
-                <a
-                    href="{{ route('staff.dashboard') }}"
+                <a href="{{ route('staff.dashboard') }}"
                     class="block rounded-lg px-4 py-3 text-sm font-medium
                         {{ request()->routeIs('staff.dashboard')
                             ? 'bg-emerald-600 text-white'
-                            : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}"
-                >
+                            : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                     Dashboard
                 </a>
 
                 @can('enquiries.view')
-                    <a
-                        href="{{ route('staff.enquiries.index') }}"
+                    <a href="{{ route('staff.enquiries.index') }}"
                         class="block rounded-lg px-4 py-3 text-sm font-medium
                             {{ request()->routeIs('staff.enquiries.*')
                                 ? 'bg-emerald-600 text-white'
-                                : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}"
-                    >
+                                : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                         Property Enquiries
                     </a>
                 @endcan
@@ -66,20 +70,16 @@
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <span class="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 sm:inline">
+                        <span
+                            class="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 sm:inline">
                             {{ auth()->user()->getRoleNames()->first() ?? 'Staff' }}
                         </span>
 
-                        <form
-                            method="POST"
-                            action="{{ route('logout') }}"
-                        >
+                        <form method="POST" action="{{ route('logout') }}">
                             @csrf
 
-                            <button
-                                type="submit"
-                                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100"
-                            >
+                            <button type="submit"
+                                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100">
                                 Log out
                             </button>
                         </form>
@@ -89,7 +89,8 @@
 
             <main class="flex-1 p-6 lg:p-8">
                 @if (session('status'))
-                    <div class="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    <div
+                        class="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
                         {{ session('status') }}
                     </div>
                 @endif
@@ -113,4 +114,5 @@
         </div>
     </div>
 </body>
+
 </html>

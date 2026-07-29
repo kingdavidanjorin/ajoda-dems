@@ -8,15 +8,39 @@ use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 
 final class NotificationController extends Controller
 {
+    /**
+     * Only these known notification events are allowed to generate links.
+     *
+     * @var array<string, string>
+     */
+    private const DESTINATION_ROUTES = [
+        'inspection_scheduled' => 'customer.inspections.index',
+        'inspection_reminder' => 'customer.inspections.index',
+        'handover_scheduled' => 'customer.handovers.index',
+        'handover_reminder' => 'customer.handovers.index',
+    ];
+
     public function index(Request $request): View
     {
         $notifications = $request->user()
             ->notifications()
             ->latest()
             ->paginate(15);
+
+        $notifications->getCollection()->each(
+            function (DatabaseNotification $notification): void {
+                $notification->setAttribute(
+                    'destination_url',
+                    $this->destinationUrl(
+                        $notification->data,
+                    ),
+                );
+            },
+        );
 
         $unreadCount = $request->user()
             ->unreadNotifications()
@@ -65,5 +89,25 @@ final class NotificationController extends Controller
                 'notification_status',
                 'All notifications were marked as read.',
             );
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function destinationUrl(array $data): ?string
+    {
+        $event = $data['event'] ?? null;
+
+        if (! is_string($event)) {
+            return null;
+        }
+
+        $routeName = self::DESTINATION_ROUTES[$event] ?? null;
+
+        if ($routeName === null) {
+            return null;
+        }
+
+        return route($routeName);
     }
 }

@@ -53,7 +53,7 @@
             @php
                 $isUnread = $notification->read_at === null;
                 $data = $notification->data;
-                $url = $data['url'] ?? null;
+                $url = $notification->getAttribute('destination_url');
             @endphp
 
             <article
@@ -93,7 +93,7 @@
                     </div>
 
                     <div class="flex shrink-0 flex-wrap items-start gap-3">
-                        @if ($url)
+                        @if (is_string($url) && $url !== '')
                             <a href="{{ $url }}"
                                 class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-800">
                                 View details
@@ -101,8 +101,7 @@
                         @endif
 
                         @if ($isUnread)
-                            <form method="POST"
-                                action="{{ route('customer.notifications.read', $notification->id) }}">
+                            <form method="POST" action="{{ route('customer.notifications.read', $notification->id) }}">
                                 @csrf
                                 @method('PATCH')
 

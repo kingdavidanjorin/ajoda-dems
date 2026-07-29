@@ -52,7 +52,6 @@ final class HandoverReminderNotification extends Notification implements ShouldQ
             'property_code' => $propertyCode,
             'scheduled_at' =>
             $handover->scheduled_at->toIso8601String(),
-            'url' => route('customer.handovers.index'),
         ];
     }
 }

@@ -1,3 +1,18 @@
+@php
+    $pageTitle = trim(strip_tags($__env->yieldContent('title', (string) config('app.name'))));
+
+    $metaDescription =
+        preg_replace(
+            '/\s+/u',
+            ' ',
+            strip_tags(
+                $__env->yieldContent('meta_description', 'Discover modern residential properties at Ajoda GRA.'),
+            ),
+        ) ?? '';
+
+    $metaDescription = trim($metaDescription);
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -5,11 +20,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta name="description" content="@yield('meta_description', 'Discover modern residential properties at Ajoda GRA.')">
+    <meta name="description" content="{{ $metaDescription }}">
 
-    <title>
-        @yield('title', config('app.name'))
-    </title>
+    <title>{{ $pageTitle }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>

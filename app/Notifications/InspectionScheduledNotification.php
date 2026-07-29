@@ -54,7 +54,6 @@ final class InspectionScheduledNotification extends Notification implements Shou
             'property_code' => $propertyCode,
             'scheduled_at' =>
             $inspection->scheduled_at->toIso8601String(),
-            'url' => route('customer.inspections.index'),
         ];
     }
 }

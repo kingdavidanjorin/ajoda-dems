@@ -10,6 +10,7 @@ use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 final class AuditLogController extends Controller
 {
@@ -17,42 +18,72 @@ final class AuditLogController extends Controller
     {
         $this->ensureAccess($request->user());
 
+        $filters = $request->validate([
+            'event' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'date_from' => [
+                'nullable',
+                'date_format:Y-m-d',
+            ],
+
+            'date_to' => [
+                'nullable',
+                'date_format:Y-m-d',
+
+                Rule::when(
+                    $request->filled('date_from'),
+                    [
+                        'after_or_equal:date_from',
+                    ],
+                ),
+            ],
+        ]);
+
         $auditLogs = AuditLog::query()
             ->with('actor')
             ->when(
-                $request->filled('event'),
-                fn ($query) => $query->where(
+                $filters['event'] ?? null,
+                fn($query, string $event) => $query->where(
                     'event',
-                    $request->string('event')->toString(),
+                    $event,
                 ),
             )
             ->when(
-                $request->filled('date_from'),
-                fn ($query) => $query->whereDate(
+                $filters['date_from'] ?? null,
+                fn($query, string $dateFrom) => $query->whereDate(
                     'created_at',
                     '>=',
-                    $request->string('date_from')->toString(),
+                    $dateFrom,
                 ),
             )
             ->when(
-                $request->filled('date_to'),
-                fn ($query) => $query->whereDate(
+                $filters['date_to'] ?? null,
+                fn($query, string $dateTo) => $query->whereDate(
                     'created_at',
                     '<=',
-                    $request->string('date_to')->toString(),
+                    $dateTo,
                 ),
             )
             ->latest()
             ->paginate(25)
             ->withQueryString();
 
-        return view('admin.audit.index', compact('auditLogs'));
+        return view(
+            'admin.audit.index',
+            compact('auditLogs'),
+        );
     }
 
     private function ensureAccess(User $user): void
     {
         abort_unless(
-            $user->hasRole(RoleName::SystemAdministrator->value),
+            $user->hasRole(
+                RoleName::SystemAdministrator->value,
+            ),
             403,
         );
     }

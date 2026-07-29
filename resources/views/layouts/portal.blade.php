@@ -1,3 +1,12 @@
+@php
+    $pageTitle = trim(strip_tags($__env->yieldContent('title', 'Ajoda GRA Portal')));
+
+    $portalName = trim(strip_tags($__env->yieldContent('portal_name', 'Digital Estate Management')));
+
+    $pageEyebrow = trim(strip_tags($__env->yieldContent('page_eyebrow', 'Ajoda GRA')));
+
+    $pageHeading = trim(strip_tags($__env->yieldContent('page_heading', 'Dashboard')));
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -6,9 +15,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>
-        @yield('title', 'Ajoda GRA Portal')
-    </title>
+    <title>{{ $pageTitle }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -32,7 +39,7 @@
                             </span>
 
                             <span class="block truncate text-xs text-stone-500">
-                                @yield('portal_name', 'Digital Estate Management')
+                                {{ $portalName }}
                             </span>
                         </span>
                     </a>
@@ -89,7 +96,7 @@
                             </span>
 
                             <span class="block truncate text-xs text-stone-500">
-                                @yield('portal_name', 'Digital Estate Management')
+                                {{ $portalName }}
                             </span>
                         </span>
                     </a>
@@ -161,11 +168,11 @@
                     class="flex min-h-20 flex-col items-start justify-between gap-4 px-5 py-5 sm:flex-row sm:items-center sm:px-6 lg:px-8">
                     <div class="min-w-0">
                         <p class="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
-                            @yield('page_eyebrow', 'Ajoda GRA')
+                            {{ $pageEyebrow }}
                         </p>
 
                         <h1 class="mt-1 truncate text-xl font-bold sm:text-2xl">
-                            @yield('page_heading', 'Dashboard')
+                            {{ $pageHeading }}
                         </h1>
                     </div>
 
