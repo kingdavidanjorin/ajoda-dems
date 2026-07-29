@@ -34,7 +34,14 @@ return [
     */
 
     'pagination' => [
-        'per_page' => (int) env('DEMS_PAGINATION_PER_PAGE', 15),
+        'per_page' => (int) env(
+            'DEMS_PAGINATION_PER_PAGE',
+            15,
+        ),
     ],
 
+    'reservation_hold_hours' => (int) env(
+        'DEMS_RESERVATION_HOLD_HOURS',
+        72,
+    ),
 ];

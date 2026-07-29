@@ -1,71 +1,61 @@
-<p class="px-3 text-xs font-bold uppercase tracking-[0.16em] text-stone-400">
+<p class="mb-4 text-xs font-bold uppercase tracking-[0.16em] text-stone-400">
     Administration
 </p>
 
-<nav class="mt-4 space-y-1 text-sm font-semibold">
-    <a
-        href="{{ route('admin.dashboard') }}"
-        @class([
-            'block rounded-xl px-4 py-3 transition',
-            'bg-stone-900 text-white' =>
-                request()->routeIs('admin.dashboard'),
-            'text-stone-700 hover:bg-stone-100' =>
-                ! request()->routeIs('admin.dashboard'),
-        ])
-    >
-        Dashboard
-    </a>
+<nav class="space-y-2 text-sm font-semibold">
+    @php
+        $adminLinks = [
+            ['admin.dashboard', 'admin.dashboard', 'Dashboard'],
+            ['admin.staff.index', 'admin.staff.*', 'Staff accounts'],
+            ['admin.customers.index', 'admin.customers.*', 'Customers'],
+            ['admin.estate-properties.index', 'admin.estate-properties.*', 'Estates and properties'],
+            ['admin.access-control.index', 'admin.access-control.*', 'Roles and permissions'],
+            ['admin.reports.index', 'admin.reports.*', 'Reports'],
+            ['admin.audit.index', 'admin.audit.*', 'Audit logs'],
+            ['admin.system-settings.index', 'admin.system-settings.*', 'System settings'],
+        ];
 
-    <a
-        href="{{ route('admin.staff.index') }}"
-        @class([
-            'block rounded-xl px-4 py-3 transition',
-            'bg-stone-900 text-white' =>
-                request()->routeIs('admin.staff.*'),
-            'text-stone-700 hover:bg-stone-100' =>
-                ! request()->routeIs('admin.staff.*'),
-        ])
-    >
-        Staff accounts
-    </a>
+        $operationLinks = [
+            ['staff.enquiries.index', 'staff.enquiries.*', 'Property enquiries'],
+            ['staff.reservations.index', 'staff.reservations.*', 'Reservations'],
+            ['staff.purchases.index', 'staff.purchases.*', 'Purchases'],
+            ['staff.payments.index', 'staff.payments.*', 'Payments'],
+            ['staff.documents.index', 'staff.documents.*', 'Documents'],
+            ['staff.communications.index', 'staff.communications.*', 'Communications'],
+            ['staff.inspections.index', 'staff.inspections.*', 'Inspections'],
+            ['staff.handovers.index', 'staff.handovers.*', 'Handovers'],
+        ];
+    @endphp
 
-    <span class="flex items-center justify-between rounded-xl px-4 py-3 text-stone-400">
-        <span>Customers</span>
+    @foreach ($adminLinks as [$routeName, $activePattern, $label])
+        @if (\Illuminate\Support\Facades\Route::has($routeName))
+            <a
+                href="{{ route($routeName) }}"
+                class="block rounded-xl px-4 py-3 transition
+                    {{ request()->routeIs($activePattern)
+                        ? 'bg-stone-900 text-white'
+                        : 'text-stone-700 hover:bg-stone-100 hover:text-stone-950' }}"
+            >
+                {{ $label }}
+            </a>
+        @endif
+    @endforeach
 
-        <span class="text-[10px] font-bold uppercase">
-            Soon
-        </span>
-    </span>
+    <p class="px-4 pb-1 pt-5 text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400">
+        Operations
+    </p>
 
-    <span class="flex items-center justify-between rounded-xl px-4 py-3 text-stone-400">
-        <span>Estates and properties</span>
-
-        <span class="text-[10px] font-bold uppercase">
-            Soon
-        </span>
-    </span>
-
-    <span class="flex items-center justify-between rounded-xl px-4 py-3 text-stone-400">
-        <span>Roles and permissions</span>
-
-        <span class="text-[10px] font-bold uppercase">
-            Later
-        </span>
-    </span>
-
-    <span class="flex items-center justify-between rounded-xl px-4 py-3 text-stone-400">
-        <span>Audit logs</span>
-
-        <span class="text-[10px] font-bold uppercase">
-            Later
-        </span>
-    </span>
-
-    <span class="flex items-center justify-between rounded-xl px-4 py-3 text-stone-400">
-        <span>System settings</span>
-
-        <span class="text-[10px] font-bold uppercase">
-            Later
-        </span>
-    </span>
+    @foreach ($operationLinks as [$routeName, $activePattern, $label])
+        @if (\Illuminate\Support\Facades\Route::has($routeName))
+            <a
+                href="{{ route($routeName) }}"
+                class="block rounded-xl px-4 py-3 transition
+                    {{ request()->routeIs($activePattern)
+                        ? 'bg-emerald-50 text-emerald-800'
+                        : 'text-stone-700 hover:bg-stone-100 hover:text-stone-950' }}"
+            >
+                {{ $label }}
+            </a>
+        @endif
+    @endforeach
 </nav>

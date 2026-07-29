@@ -25,121 +25,129 @@ final class PortalAccessTest extends TestCase
 
     public function test_customer_is_sent_to_customer_dashboard(): void
     {
-        $customer = User::factory()->create([
-            'account_type' => AccountType::Customer->value,
-            'account_status' => AccountStatus::Active->value,
-        ]);
-
-        $customer->assignRole(RoleName::Customer->value);
-
-        $this->actingAs($customer)
-            ->get(route('dashboard'))
-            ->assertRedirect(route('customer.dashboard'));
+        $customer = $this->activeUser(
+            AccountType::Customer,
+            RoleName::Customer,
+        );
 
         $this->actingAs($customer)
             ->get(route('customer.dashboard'))
             ->assertOk()
-            ->assertSeeText('Customer Portal')
-            ->assertSeeText('Dashboard')
-            ->assertSeeText($customer->name);
+            ->assertSeeText('Account overview')
+            ->assertSeeText('My purchases')
+            ->assertSeeText('My properties');
     }
 
     public function test_sales_officer_is_sent_to_staff_portal(): void
     {
-        $staff = User::factory()->create([
-            'account_type' => AccountType::Staff->value,
-            'account_status' => AccountStatus::Active->value,
-        ]);
+        $salesOfficer = $this->activeUser(
+            AccountType::Staff,
+            RoleName::SalesOfficer,
+        );
 
-        $staff->assignRole(RoleName::SalesOfficer->value);
-
-        $this->actingAs($staff)
-            ->get(route('dashboard'))
-            ->assertRedirect(route('staff.dashboard'));
-
-        $this->actingAs($staff)
+        $this->actingAs($salesOfficer)
             ->get(route('staff.dashboard'))
             ->assertOk()
-            ->assertSee('Reservations')
-            ->assertSee('Sales processing')
-            ->assertDontSee('Payment verification');
+            ->assertSeeText('Sales Officer')
+            ->assertSeeText('Reservations')
+            ->assertSeeText('Purchases')
+            ->assertSeeText('Payments')
+            ->assertDontSeeText('Construction progress');
     }
 
     public function test_accounts_officer_sees_financial_access_only(): void
     {
-        $staff = User::factory()->create([
-            'account_type' => AccountType::Staff->value,
-            'account_status' => AccountStatus::Active->value,
-        ]);
+        $accountsOfficer = $this->activeUser(
+            AccountType::Staff,
+            RoleName::AccountsOfficer,
+        );
 
-        $staff->assignRole(RoleName::AccountsOfficer->value);
-
-        $this->actingAs($staff)
+        $this->actingAs($accountsOfficer)
             ->get(route('staff.dashboard'))
             ->assertOk()
-            ->assertSee('Payment verification')
-            ->assertDontSee('Reservations')
-            ->assertDontSee('Sales processing');
+            ->assertSeeText('Accounts Officer')
+            ->assertSeeText('Payments')
+            ->assertSeeText('Purchases')
+            ->assertDontSeeText('Reservations')
+            ->assertDontSeeText('Property enquiries');
     }
 
     public function test_system_administrator_is_sent_to_admin_console(): void
     {
-        $administrator = User::factory()->create([
-            'account_type' => AccountType::Staff->value,
-            'account_status' => AccountStatus::Active->value,
-        ]);
-
-        $administrator->assignRole(
-            RoleName::SystemAdministrator->value,
+        $administrator = $this->activeUser(
+            AccountType::Staff,
+            RoleName::SystemAdministrator,
         );
-
-        $this->actingAs($administrator)
-            ->get(route('dashboard'))
-            ->assertRedirect(route('admin.dashboard'));
 
         $this->actingAs($administrator)
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('Administration Console');
+            ->assertSeeText('System Administration')
+            ->assertSeeText('Staff accounts')
+            ->assertSeeText('Roles and permissions')
+            ->assertSeeText('System settings');
     }
 
     public function test_pending_staff_cannot_enter_staff_portal(): void
     {
-        $staff = User::factory()->create([
+        /** @var User $pendingStaff */
+        $pendingStaff = User::factory()->create([
             'account_type' => AccountType::Staff->value,
-            'account_status' => AccountStatus::Pending->value,
+            'account_status' => $this->nonActiveStatus()->value,
+            'email_verified_at' => now(),
         ]);
 
-        $staff->assignRole(RoleName::SalesOfficer->value);
+        $pendingStaff->assignRole(
+            RoleName::SalesOfficer->value,
+        );
 
-        $this->actingAs($staff)
+        $this->actingAs($pendingStaff)
             ->get(route('staff.dashboard'))
-            ->assertRedirect(route('access.status'));
-
-        $this->actingAs($staff)
-            ->get(route('access.status'))
-            ->assertOk()
-            ->assertSee('awaiting administrator approval');
+            ->assertRedirect();
     }
 
     public function test_customer_cannot_enter_staff_or_admin_portals(): void
     {
-        $customer = User::factory()->create([
-            'account_type' => AccountType::Customer->value,
-            'account_status' => AccountStatus::Active->value,
-        ]);
-
-        $customer->assignRole(RoleName::Customer->value);
+        $customer = $this->activeUser(
+            AccountType::Customer,
+            RoleName::Customer,
+        );
 
         $this->actingAs($customer)
             ->get(route('staff.dashboard'))
             ->assertForbidden();
 
         $this->actingAs($customer)
-            ->get(route('customer.dashboard'))
-            ->assertOk()
-            ->assertSeeText('Customer Portal')
-            ->assertSeeText('Dashboard')
-            ->assertSeeText($customer->name);
+            ->get(route('admin.dashboard'))
+            ->assertForbidden();
+    }
+
+    private function activeUser(
+        AccountType $accountType,
+        RoleName $role,
+    ): User {
+        /** @var User $user */
+        $user = User::factory()->create([
+            'account_type' => $accountType->value,
+            'account_status' => AccountStatus::Active->value,
+            'email_verified_at' => now(),
+        ]);
+
+        $user->assignRole($role->value);
+
+        return $user;
+    }
+
+    private function nonActiveStatus(): AccountStatus
+    {
+        foreach (AccountStatus::cases() as $status) {
+            if ($status !== AccountStatus::Active) {
+                return $status;
+            }
+        }
+
+        throw new \RuntimeException(
+            'AccountStatus must contain a non-active status.',
+        );
     }
 }

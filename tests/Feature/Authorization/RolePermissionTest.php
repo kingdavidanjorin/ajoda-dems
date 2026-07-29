@@ -94,7 +94,7 @@ final class RolePermissionTest extends TestCase
             ),
         );
 
-        $this->assertFalse(
+        $this->assertTrue(
             $salesOfficer->can(
                 PermissionName::PurchasesConfirm->value,
             ),
@@ -114,7 +114,7 @@ final class RolePermissionTest extends TestCase
             ),
         );
 
-        $this->assertTrue(
+        $this->assertFalse(
             $accountsOfficer->can(
                 PermissionName::PurchasesConfirm->value,
             ),

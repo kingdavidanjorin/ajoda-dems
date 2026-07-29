@@ -3,7 +3,7 @@
 @section('title', 'Edit Staff Account | Ajoda GRA')
 @section('portal_name', 'System Administration Console')
 @section('page_eyebrow', 'Access Management')
-@section('page_title', 'Edit Staff Account')
+@section('page_heading', 'Edit Staff Account')
 
 @section('navigation')
     @include('admin.partials.navigation')
@@ -30,7 +30,7 @@
             </h2>
 
             <p class="mt-2 text-stone-600">
-                Update the staff member’s profile, department and assigned roles.
+                Update the staff memberâ€™s profile, department and assigned roles.
             </p>
 
             <div class="mt-4 flex flex-wrap gap-2">

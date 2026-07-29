@@ -3,7 +3,7 @@
 @section('title', 'Staff Accounts | Ajoda GRA')
 @section('portal_name', 'System Administration Console')
 @section('page_eyebrow', 'Access Management')
-@section('page_title', 'Staff Accounts')
+@section('page_heading', 'Staff Accounts')
 
 @section('navigation')
     @include('admin.partials.navigation')

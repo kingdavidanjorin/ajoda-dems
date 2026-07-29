@@ -232,4 +232,6 @@
             </div>
         </section>
     @endif
+@include('public.properties.partials.reservation-form')
+@include('public.properties.partials.enquiry-form')
 @endsection

@@ -48,6 +48,14 @@ final class House extends Model
         ];
     }
 
+    public function estatePhase(): BelongsTo
+    {
+        return $this->belongsTo(
+            EstatePhase::class,
+            'estate_phase_id',
+        );
+    }
+
     public function estate(): BelongsTo
     {
         return $this->belongsTo(Estate::class);
@@ -63,7 +71,9 @@ final class House extends Model
 
     public function houseType(): BelongsTo
     {
-        return $this->belongsTo(HouseType::class);
+        return $this->belongsTo(HouseType::class,
+            'house_type_id',
+        );
     }
 
     public function media(): HasMany
@@ -103,8 +113,44 @@ final class House extends Model
             ?? $this->houseType->base_price;
     }
 
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(
+            PropertyReservation::class,
+        );
+    }
+
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
+    public function activePurchase(): HasOne
+    {
+        return $this->hasOne(
+            Purchase::class,
+            'active_house_id',
+        );
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    public function allocation(): HasOne
+    {
+        return $this->hasOne(
+            PropertyAllocation::class,
+            'house_id',
+        );
+    }
+
+    public function constructionProgressUpdates(): HasMany
+    {
+        return $this->hasMany(
+            ConstructionProgressUpdate::class,
+            'house_id',
+        )->latest('occurred_at');
     }
 }
