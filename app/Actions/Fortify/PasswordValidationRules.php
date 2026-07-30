@@ -18,6 +18,7 @@ trait PasswordValidationRules
         return [
             'required',
             'string',
+            'max:128',
             Password::default(),
             'confirmed',
         ];

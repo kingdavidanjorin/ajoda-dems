@@ -72,7 +72,7 @@ final class DemsMakeAdmin extends Command
         );
 
         $password = (string) $this->secret(
-            'Administrator password (minimum 12 characters)',
+            'Administrator password (minimum 15 characters)',
         );
 
         $passwordConfirmation = (string) $this->secret(
@@ -102,12 +102,10 @@ final class DemsMakeAdmin extends Command
 
                 'password' => [
                     'required',
+                    'string',
+                    'max:128',
                     'confirmed',
-                    Password::min(12)
-                        ->letters()
-                        ->mixedCase()
-                        ->numbers()
-                        ->symbols(),
+                    Password::default(),
                 ],
             ],
         );

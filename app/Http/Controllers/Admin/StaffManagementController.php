@@ -13,6 +13,7 @@ use App\Http\Requests\Admin\UpdateStaffRequest;
 use App\Models\Department;
 use App\Models\StaffProfile;
 use App\Models\User;
+use App\Services\Auth\SessionSecurity;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -27,6 +28,10 @@ use Throwable;
 
 final class StaffManagementController extends Controller
 {
+    public function __construct(
+        private readonly SessionSecurity $sessionSecurity,
+    ) {}
+
     public function index(Request $request): View
     {
         $filters = $request->validate([
@@ -167,6 +172,11 @@ final class StaffManagementController extends Controller
                     ]);
 
                     $staff->syncRoles($data['roles']);
+                    if ($emailChanged) {
+                        $this->sessionSecurity->revokeAll(
+                            $staff,
+                        );
+                    }
 
                     return $staff;
                 },
@@ -254,7 +264,22 @@ final class StaffManagementController extends Controller
         );
 
         if ($emailChanged) {
-            $this->sendSetupNotifications($staff->fresh());
+            $staff->refresh();
+
+            $staff->sendEmailVerificationNotification();
+
+            /*
+     * Only pending staff still require an initial
+     * password-setup link.
+     */
+            if (
+                $staff->account_status
+                === AccountStatus::Pending
+            ) {
+                Password::sendResetLink([
+                    'email' => $staff->email,
+                ]);
+            }
         }
 
         return redirect()
@@ -279,13 +304,23 @@ final class StaffManagementController extends Controller
         );
     }
 
-    public function suspend(User $staff): RedirectResponse
-    {
+    public function suspend(
+        User $staff,
+    ): RedirectResponse {
         $this->ensureManageableStaff($staff);
 
-        $staff->update([
-            'account_status' => AccountStatus::Suspended->value,
-        ]);
+        DB::transaction(
+            function () use ($staff): void {
+                $staff->forceFill([
+                    'account_status' =>
+                    AccountStatus::Suspended,
+                ])->save();
+
+                $this->sessionSecurity->revokeAll(
+                    $staff,
+                );
+            },
+        );
 
         return back()->with(
             'status',
@@ -293,9 +328,17 @@ final class StaffManagementController extends Controller
         );
     }
 
-    public function resendSetup(User $staff): RedirectResponse
-    {
+    public function resendSetup(
+        User $staff,
+    ): RedirectResponse {
         $this->ensureManageableStaff($staff);
+
+        abort_unless(
+            $staff->account_status
+                === AccountStatus::Pending,
+            422,
+            'Setup instructions can only be resent to pending staff accounts.',
+        );
 
         $this->sendSetupNotifications($staff);
 

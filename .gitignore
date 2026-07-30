@@ -22,7 +22,10 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
-.env.example
+.env
 .env.*
+!.env.example
 .env.before-dems-configuration
 /laragon-wamp.exe
+/storage/app/staff-setup-link.txt
+/storage/app/verification-link.txt

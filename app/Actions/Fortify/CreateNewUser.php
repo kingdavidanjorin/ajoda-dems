@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
@@ -19,40 +20,84 @@ final class CreateNewUser implements CreatesNewUsers
     use PasswordValidationRules;
 
     /**
-     * Validate and create a newly registered customer.
-     *
-     * @param  array<string, string>  $input
+     * @param array<string, string> $input
      */
     public function create(array $input): User
     {
-        Validator::make($input, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                Rule::unique(User::class),
+        $normalised = [
+            'name' => trim(
+                (string) ($input['name'] ?? ''),
+            ),
+
+            'email' => Str::lower(
+                trim(
+                    (string) ($input['email'] ?? ''),
+                ),
+            ),
+
+            'password' =>
+            (string) ($input['password'] ?? ''),
+
+            'password_confirmation' =>
+            (string) (
+                $input['password_confirmation']
+                ?? ''
+            ),
+        ];
+
+        Validator::make(
+            $normalised,
+            [
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+
+                'email' => [
+                    'required',
+                    'string',
+                    'email',
+                    'max:255',
+
+                    Rule::unique(
+                        User::class,
+                        'email',
+                    ),
+                ],
+
+                'password' =>
+                $this->passwordRules(),
             ],
-            'password' => $this->passwordRules(),
-        ])->validate();
+        )->validate();
 
-        return DB::transaction(function () use ($input): User {
-            $user = User::create([
-                'name' => $input['name'],
-                'email' => $input['email'],
-                'password' => Hash::make($input['password']),
-                'account_type' => AccountType::Customer->value,
-                'account_status' => AccountStatus::Active->value,
-            ]);
+        return DB::transaction(
+            function () use ($normalised): User {
+                $user = User::query()->create([
+                    'name' => $normalised['name'],
+                    'email' => $normalised['email'],
 
-            $user->customerProfile()->create([
-                'country' => 'Nigeria',
-            ]);
+                    'password' => Hash::make(
+                        $normalised['password'],
+                    ),
 
-            $user->assignRole(RoleName::Customer->value);
+                    'account_type' =>
+                    AccountType::Customer->value,
 
-            return $user;
-        });
+                    'account_status' =>
+                    AccountStatus::Active->value,
+                ]);
+
+                $user->customerProfile()->create([
+                    'country' => 'Nigeria',
+                ]);
+
+                $user->assignRole(
+                    RoleName::Customer->value,
+                );
+
+                return $user;
+            },
+        );
     }
 }

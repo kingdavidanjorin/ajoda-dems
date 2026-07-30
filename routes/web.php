@@ -65,13 +65,24 @@ Route::get(
 
 Route::middleware([
     'auth',
+    'auth.session',
     'verified',
 ])->group(function (): void {
     Route::get(
         '/dashboard',
         DashboardRedirectController::class,
     )->name('dashboard');
+});
 
+/*
+ * Keep the access-status page outside the active and auth.session
+ * middleware so an authenticated inactive user can still see why
+ * access has been restricted.
+ */
+Route::middleware([
+    'auth',
+    'verified',
+])->group(function (): void {
     Route::get(
         '/access-status',
         AccountAccessController::class,
@@ -80,6 +91,7 @@ Route::middleware([
 
 Route::middleware([
     'auth',
+    'auth.session',
     'verified',
     'active',
     'customer',
@@ -172,6 +184,7 @@ Route::middleware([
 
 Route::middleware([
     'auth',
+    'auth.session',
     'verified',
     'active',
     'staff',
@@ -341,6 +354,7 @@ Route::middleware([
 
 Route::middleware([
     'auth',
+    'auth.session',
     'verified',
     'active',
     'staff',
@@ -407,6 +421,7 @@ require __DIR__ . '/settings.php';
 // CHECKPOINT 19 ROUTES
 Route::middleware([
     'auth',
+    'auth.session',
     'verified',
     \App\Http\Middleware\EnsureAccountIsActive::class,
     \App\Http\Middleware\EnsureUserIsStaff::class,
@@ -434,6 +449,7 @@ Route::middleware([
 // ADMIN CONTROL CENTRE ROUTES
 Route::middleware([
     'auth',
+    'auth.session',
     'verified',
     \App\Http\Middleware\EnsureAccountIsActive::class,
     \App\Http\Middleware\EnsureUserIsStaff::class,

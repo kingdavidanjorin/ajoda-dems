@@ -1,17 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\Settings;
 
 use App\Concerns\PasswordValidationRules;
+use App\Models\User;
+use App\Services\Auth\SessionSecurity;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Title('Security settings')]
-class Security extends Component
+final class Security extends Component
 {
     use PasswordValidationRules;
 
@@ -21,33 +26,72 @@ class Security extends Component
 
     public string $password_confirmation = '';
 
-    /**
-     * Mount the component.
-     */
-    public function mount(DisableTwoFactorAuthentication $disableTwoFactorAuthentication): void {}
+    public function mount(
+        DisableTwoFactorAuthentication $disableTwoFactorAuthentication,
+    ): void {}
 
-    /**
-     * Update the password for the currently authenticated user.
-     */
-    public function updatePassword(): void
-    {
+    public function updatePassword(
+        SessionSecurity $sessionSecurity,
+    ): void {
         try {
             $validated = $this->validate([
-                'current_password' => $this->currentPasswordRules(),
-                'password' => $this->passwordRules(),
-            ]);
-        } catch (ValidationException $e) {
-            $this->reset('current_password', 'password', 'password_confirmation');
+                'current_password' =>
+                $this->currentPasswordRules(),
 
-            throw $e;
+                'password' =>
+                $this->passwordRules(),
+            ]);
+        } catch (ValidationException $exception) {
+            $this->reset(
+                'current_password',
+                'password',
+                'password_confirmation',
+            );
+
+            throw $exception;
         }
 
-        Auth::user()->update([
-            'password' => $validated['password'],
-        ]);
+        /** @var User $user */
+        $user = Auth::user();
 
-        $this->reset('current_password', 'password', 'password_confirmation');
+        $user->forceFill([
+            'password' => Hash::make(
+                $validated['password'],
+            ),
+        ])->save();
 
-        Flux::toast(variant: 'success', text: __('Password updated.'));
+        /*
+         * Refresh the persistent authentication token and
+         * prepare Laravel's auth.session middleware to reject
+         * other authenticated devices.
+         */
+        Auth::logoutOtherDevices(
+            $validated['password'],
+        );
+
+        /*
+         * Because DEMS uses database sessions, delete all other
+         * rows immediately instead of waiting for their next
+         * request.
+         */
+        $sessionSecurity->revokeOtherDatabaseSessions(
+            $user,
+            request()->session()->getId(),
+        );
+
+        request()->session()->regenerate();
+
+        $this->reset(
+            'current_password',
+            'password',
+            'password_confirmation',
+        );
+
+        Flux::toast(
+            variant: 'success',
+            text: __(
+                'Password updated. Other signed-in devices were logged out.',
+            ),
+        );
     }
 }
