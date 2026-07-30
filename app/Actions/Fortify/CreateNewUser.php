@@ -89,7 +89,9 @@ final class CreateNewUser implements CreatesNewUsers
                 ]);
 
                 $user->customerProfile()->create([
-                    'country' => 'Nigeria',
+                    'country' => (string) config(
+                        'dems.customer.default_country',
+                    ),
                 ]);
 
                 $user->assignRole(

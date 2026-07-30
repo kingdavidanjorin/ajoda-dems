@@ -3,45 +3,44 @@
 declare(strict_types=1);
 
 return [
-
     /*
     |--------------------------------------------------------------------------
-    | Business Timezone
-    |--------------------------------------------------------------------------
-    |
-    | Application and database timestamps remain in UTC. This timezone is used
-    | when dates and times are displayed to Ajoda GRA customers and staff.
-    |
-    */
-
-    'business_timezone' => env(
-        'DEMS_BUSINESS_TIMEZONE',
-        'Africa/Lagos',
-    ),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Default Currency
+    | Customer defaults
     |--------------------------------------------------------------------------
     */
 
-    'currency' => env('DEMS_CURRENCY', 'NGN'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Pagination
-    |--------------------------------------------------------------------------
-    */
-
-    'pagination' => [
-        'per_page' => (int) env(
-            'DEMS_PAGINATION_PER_PAGE',
-            15,
+    'customer' => [
+        'default_country' => env(
+            'DEMS_DEFAULT_CUSTOMER_COUNTRY',
+            'Nigeria',
         ),
     ],
 
-    'reservation_hold_hours' => (int) env(
-        'DEMS_RESERVATION_HOLD_HOURS',
-        72,
-    ),
+    /*
+    |--------------------------------------------------------------------------
+    | Local authentication diagnostics
+    |--------------------------------------------------------------------------
+    |
+    | These files may contain temporary password-reset or verification
+    | links. They must only be written during explicitly enabled local
+    | development.
+    |
+    */
+
+    'auth_debug' => [
+        'write_links' => (bool) env(
+            'DEMS_WRITE_LOCAL_AUTH_LINKS',
+            false,
+        ),
+
+        'reset_link_filename' => env(
+            'DEMS_RESET_LINK_FILENAME',
+            'staff-setup-link.txt',
+        ),
+
+        'verification_link_filename' => env(
+            'DEMS_VERIFICATION_LINK_FILENAME',
+            'verification-link.txt',
+        ),
+    ],
 ];
