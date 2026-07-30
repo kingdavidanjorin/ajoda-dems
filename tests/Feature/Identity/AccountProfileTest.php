@@ -38,8 +38,8 @@ final class AccountProfileTest extends TestCase
         $response = $this->post('/register', [
             'name' => 'Ajoda Customer',
             'email' => 'customer@example.com',
-            'password' => 'Password123!',
-            'password_confirmation' => 'Password123!',
+            'password' => 'Correct-Horse-Battery-7',
+            'password_confirmation' => 'Correct-Horse-Battery-7',
         ]);
 
         $response->assertSessionHasNoErrors();

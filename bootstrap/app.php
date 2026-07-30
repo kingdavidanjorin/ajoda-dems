@@ -18,25 +18,25 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $applicationHost = parse_url(
-            (string) config('app.url'),
-            PHP_URL_HOST,
-        );
+        /*
+        |--------------------------------------------------------------------------
+        | Trusted Hosts
+        |--------------------------------------------------------------------------
+        |
+        | Laravel will read the host from config('app.url') when processing
+        | HTTP requests, after the configuration service has been loaded.
+        | Calling config() directly in this bootstrap callback is too early.
+        |
+        */
 
-        if (
-            is_string($applicationHost)
-            && $applicationHost !== ''
-        ) {
-            $middleware->trustHosts(
-                at: [
-                    '^' . preg_quote(
-                        $applicationHost,
-                        '/',
-                    ) . '$',
-                ],
-                subdomains: false,
-            );
-        }
+        $middleware->trustHosts();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Custom Middleware Aliases
+        |--------------------------------------------------------------------------
+        */
+
         $middleware->alias([
             'active' => EnsureAccountIsActive::class,
             'customer' => EnsureUserIsCustomer::class,
@@ -49,6 +49,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn(Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn(Request $request): bool =>
+            $request->is('api/*')
+                || $request->expectsJson(),
         );
-    })->create();
+    })
+    ->create();

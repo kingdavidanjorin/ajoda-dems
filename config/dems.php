@@ -5,6 +5,39 @@ declare(strict_types=1);
 return [
     /*
     |--------------------------------------------------------------------------
+    | Business settings
+    |--------------------------------------------------------------------------
+    |
+    | Application and database timestamps remain in UTC. The business
+    | timezone is used when dates are displayed to Ajoda GRA customers
+    | and staff.
+    |
+    */
+
+    'business_timezone' => env(
+        'DEMS_BUSINESS_TIMEZONE',
+        'Africa/Lagos',
+    ),
+
+    'currency' => env(
+        'DEMS_CURRENCY',
+        'NGN',
+    ),
+
+    'pagination' => [
+        'per_page' => (int) env(
+            'DEMS_PAGINATION_PER_PAGE',
+            15,
+        ),
+    ],
+
+    'reservation_hold_hours' => (int) env(
+        'DEMS_RESERVATION_HOLD_HOURS',
+        72,
+    ),
+
+    /*
+    |--------------------------------------------------------------------------
     | Customer defaults
     |--------------------------------------------------------------------------
     */

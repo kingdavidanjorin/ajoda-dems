@@ -76,10 +76,10 @@ final class Security extends Component
          */
         $sessionSecurity->revokeOtherDatabaseSessions(
             $user,
-            request()->session()->getId(),
+            session()->getId(),
         );
 
-        request()->session()->regenerate();
+        session()->regenerate();
 
         $this->reset(
             'current_password',

@@ -16,7 +16,6 @@ class SecurityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
     }
 
     public function test_security_settings_page_can_be_rendered(): void
@@ -24,10 +23,12 @@ class SecurityTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)
+            ->withSession([
+                'auth.password_confirmed_at' => time(),
+            ])
             ->get(route('security.edit'));
 
         $response->assertOk();
-
     }
 
     public function test_security_settings_page_renders_without_two_factor_when_feature_is_disabled(): void
@@ -37,6 +38,9 @@ class SecurityTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
+            ->withSession([
+                'auth.password_confirmed_at' => time(),
+            ])
             ->get(route('security.edit'))
             ->assertOk()
             ->assertSee('Update password')
@@ -55,13 +59,18 @@ class SecurityTest extends TestCase
 
         $response = Livewire::test(Security::class)
             ->set('current_password', 'password')
-            ->set('password', 'new-password')
-            ->set('password_confirmation', 'new-password')
+            ->set('password', 'Correct-Horse-Battery-7')
+            ->set('password_confirmation', 'Correct-Horse-Battery-7')
             ->call('updatePassword');
 
         $response->assertHasNoErrors();
 
-        $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
+        $this->assertTrue(
+            Hash::check(
+                'Correct-Horse-Battery-7',
+                $user->refresh()->password,
+            ),
+        );
     }
 
     public function test_correct_password_must_be_provided_to_update_password(): void

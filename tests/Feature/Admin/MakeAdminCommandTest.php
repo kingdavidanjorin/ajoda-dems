@@ -37,7 +37,7 @@ final class MakeAdminCommandTest extends TestCase
             ],
         )
             ->expectsQuestion(
-                'Administrator password (minimum 12 characters)',
+                'Administrator password (minimum 15 characters)',
                 'SecureAdmin123!',
             )
             ->expectsQuestion(

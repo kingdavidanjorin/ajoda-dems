@@ -131,6 +131,8 @@ final class AuthenticationHardeningTest extends TestCase
 
     public function test_revoking_all_sessions_deletes_database_sessions_and_rotates_remember_token(): void
     {
+        config(['session.driver' => 'database']);
+
         $user = User::factory()->create([
             'remember_token' => 'known-token',
         ]);

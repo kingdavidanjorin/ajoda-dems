@@ -172,11 +172,6 @@ final class StaffManagementController extends Controller
                     ]);
 
                     $staff->syncRoles($data['roles']);
-                    if ($emailChanged) {
-                        $this->sessionSecurity->revokeAll(
-                            $staff,
-                        );
-                    }
 
                     return $staff;
                 },
