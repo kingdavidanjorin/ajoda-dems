@@ -191,6 +191,20 @@
             </header>
 
             <main class="px-5 py-7 sm:px-6 lg:px-8 lg:py-10">
+                @if (session('status'))
+                    <div
+                        class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-800">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
+                @if (session('warning'))
+                    <div
+                        class="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-5 py-4 text-sm font-semibold text-amber-900">
+                        {{ session('warning') }}
+                    </div>
+                @endif
+
                 @yield('content')
             </main>
         </div>

@@ -188,13 +188,20 @@ final class StaffManagementController extends Controller
 
         $setupSent = $this->sendSetupNotifications($staff);
 
+        if (! $emailNotificationSent) {
+            return redirect()
+                ->route('admin.staff.index')
+                ->with(
+                    'warning',
+                    'Staff account updated successfully, but the verification email could not be delivered. Confirm the email address and resend the setup instructions.',
+                );
+        }
+
         return redirect()
             ->route('admin.staff.index')
             ->with(
                 'status',
-                $setupSent
-                    ? 'Staff account created in Pending status. Setup instructions were sent.'
-                    : 'Staff account created in Pending status, but the setup emails could not be delivered. Confirm the email address and resend the setup instructions.',
+                'Staff account updated successfully.',
             );
     }
 
@@ -287,13 +294,20 @@ final class StaffManagementController extends Controller
             }
         }
 
+        if (! $setupSent) {
+            return redirect()
+                ->route('admin.staff.index')
+                ->with(
+                    'warning',
+                    'Staff account created in Pending status, but the setup emails could not be delivered. Confirm the email address and resend the setup instructions.',
+                );
+        }
+
         return redirect()
             ->route('admin.staff.index')
             ->with(
                 'status',
-                $emailNotificationSent
-                    ? 'Staff account updated successfully.'
-                    : 'Staff account updated successfully, but the verification email could not be delivered. Confirm the email address and resend the setup instructions.',
+                'Staff account created in Pending status. Setup instructions were sent.',
             );
     }
 
@@ -349,11 +363,16 @@ final class StaffManagementController extends Controller
 
         $setupSent = $this->sendSetupNotifications($staff);
 
+        if (! $setupSent) {
+            return back()->with(
+                'warning',
+                "The setup emails could not be delivered to {$staff->email}. Confirm that the email address is correct and try again.",
+            );
+        }
+
         return back()->with(
             'status',
-            $setupSent
-                ? "New setup instructions were sent to {$staff->email}."
-                : "The setup emails could not be delivered to {$staff->email}. Confirm that the email address is correct and try again.",
+            "New setup instructions were sent to {$staff->email}.",
         );
     }
 
