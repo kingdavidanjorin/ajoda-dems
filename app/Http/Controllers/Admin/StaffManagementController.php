@@ -59,7 +59,7 @@ final class StaffManagementController extends Controller
             )
             ->whereDoesntHave(
                 'roles',
-                fn (Builder $query): Builder => $query
+                fn(Builder $query): Builder => $query
                     ->where(
                         'name',
                         RoleName::SystemAdministrator->value,
@@ -90,7 +90,7 @@ final class StaffManagementController extends Controller
                                 )
                                 ->orWhereHas(
                                     'staffProfile',
-                                    fn (Builder $query): Builder => $query
+                                    fn(Builder $query): Builder => $query
                                         ->where(
                                             'staff_number',
                                             'like',
@@ -108,7 +108,7 @@ final class StaffManagementController extends Controller
             )
             ->when(
                 $filters['status'] ?? null,
-                fn (
+                fn(
                     Builder $query,
                     string $status,
                 ): Builder => $query->where(
@@ -118,7 +118,7 @@ final class StaffManagementController extends Controller
             )
             ->when(
                 $filters['role'] ?? null,
-                fn (
+                fn(
                     Builder $query,
                     string $role,
                 ): Builder => $query->role($role),
@@ -186,13 +186,15 @@ final class StaffManagementController extends Controller
                 ]);
         }
 
-        $this->sendSetupNotifications($staff);
+        $setupSent = $this->sendSetupNotifications($staff);
 
         return redirect()
             ->route('admin.staff.index')
             ->with(
                 'status',
-                'Staff account created in Pending status. Setup instructions were sent.',
+                $setupSent
+                    ? 'Staff account created in Pending status. Setup instructions were sent.'
+                    : 'Staff account created in Pending status, but the setup emails could not be delivered. Confirm the email address and resend the setup instructions.',
             );
     }
 
@@ -258,22 +260,30 @@ final class StaffManagementController extends Controller
             },
         );
 
+        $emailNotificationSent = true;
+
         if ($emailChanged) {
             $staff->refresh();
 
-            $staff->sendEmailVerificationNotification();
+            try {
+                $staff->sendEmailVerificationNotification();
 
-            /*
-     * Only pending staff still require an initial
-     * password-setup link.
-     */
-            if (
-                $staff->account_status
-                === AccountStatus::Pending
-            ) {
-                Password::sendResetLink([
-                    'email' => $staff->email,
-                ]);
+                /*
+         * Only pending staff still require an initial
+         * password-setup link.
+         */
+                if (
+                    $staff->account_status
+                    === AccountStatus::Pending
+                ) {
+                    Password::sendResetLink([
+                        'email' => $staff->email,
+                    ]);
+                }
+            } catch (Throwable $exception) {
+                report($exception);
+
+                $emailNotificationSent = false;
             }
         }
 
@@ -281,7 +291,9 @@ final class StaffManagementController extends Controller
             ->route('admin.staff.index')
             ->with(
                 'status',
-                'Staff account updated successfully.',
+                $emailNotificationSent
+                    ? 'Staff account updated successfully.'
+                    : 'Staff account updated successfully, but the verification email could not be delivered. Confirm the email address and resend the setup instructions.',
             );
     }
 
@@ -335,11 +347,13 @@ final class StaffManagementController extends Controller
             'Setup instructions can only be resent to pending staff accounts.',
         );
 
-        $this->sendSetupNotifications($staff);
+        $setupSent = $this->sendSetupNotifications($staff);
 
         return back()->with(
             'status',
-            "New setup instructions were sent to {$staff->email}.",
+            $setupSent
+                ? "New setup instructions were sent to {$staff->email}."
+                : "The setup emails could not be delivered to {$staff->email}. Confirm that the email address is correct and try again.",
         );
     }
 
@@ -358,20 +372,28 @@ final class StaffManagementController extends Controller
     {
         abort_unless(
             $staff->isStaff()
-            && ! $staff->hasRole(
-                RoleName::SystemAdministrator->value,
-            ),
+                && ! $staff->hasRole(
+                    RoleName::SystemAdministrator->value,
+                ),
             404,
         );
     }
 
-    private function sendSetupNotifications(User $staff): void
+    private function sendSetupNotifications(User $staff): bool
     {
-        $staff->sendEmailVerificationNotification();
+        try {
+            $staff->sendEmailVerificationNotification();
 
-        Password::sendResetLink([
-            'email' => $staff->email,
-        ]);
+            Password::sendResetLink([
+                'email' => $staff->email,
+            ]);
+
+            return true;
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return false;
+        }
     }
 
     private function nextStaffNumber(): string
@@ -389,11 +411,11 @@ final class StaffManagementController extends Controller
             $sequence++;
         } while (
             StaffProfile::query()
-                ->where(
-                    'staff_number',
-                    $staffNumber,
-                )
-                ->exists()
+            ->where(
+                'staff_number',
+                $staffNumber,
+            )
+            ->exists()
         );
 
         return $staffNumber;
