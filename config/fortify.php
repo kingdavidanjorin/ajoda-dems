@@ -101,8 +101,10 @@ return [
     |
     */
 
-    'middleware' => ['web'],
-
+    'middleware' => [
+        'web',
+        \App\Http\Middleware\ThrottleSensitiveFortifyRoutes::class,
+    ],
     /*
     |--------------------------------------------------------------------------
     | Rate Limiting

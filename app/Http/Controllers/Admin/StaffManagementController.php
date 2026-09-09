@@ -188,12 +188,12 @@ final class StaffManagementController extends Controller
 
         $setupSent = $this->sendSetupNotifications($staff);
 
-        if (! $emailNotificationSent) {
+        if (! $setupSent) {
             return redirect()
                 ->route('admin.staff.index')
                 ->with(
                     'warning',
-                    'Staff account updated successfully, but the verification email could not be delivered. Confirm the email address and resend the setup instructions.',
+                    'Staff account created in Pending status, but the setup emails could not be delivered. Confirm the email address and resend the setup instructions.',
                 );
         }
 
@@ -201,7 +201,7 @@ final class StaffManagementController extends Controller
             ->route('admin.staff.index')
             ->with(
                 'status',
-                'Staff account updated successfully.',
+                'Staff account created in Pending status. Setup instructions were sent.',
             );
     }
 
@@ -240,14 +240,16 @@ final class StaffManagementController extends Controller
                 $data,
                 $emailChanged,
             ): void {
-                $staff->update([
+                $staff->fill([
                     'name' => $data['name'],
                     'email' => $data['email'],
-
-                    'email_verified_at' => $emailChanged
-                        ? null
-                        : $staff->email_verified_at,
                 ]);
+
+                if ($emailChanged) {
+                    $staff->email_verified_at = null;
+                }
+
+                $staff->save();
 
                 $staff->staffProfile()->updateOrCreate(
                     [
@@ -294,12 +296,12 @@ final class StaffManagementController extends Controller
             }
         }
 
-        if (! $setupSent) {
+        if (! $emailNotificationSent) {
             return redirect()
                 ->route('admin.staff.index')
                 ->with(
                     'warning',
-                    'Staff account created in Pending status, but the setup emails could not be delivered. Confirm the email address and resend the setup instructions.',
+                    'Staff account updated successfully, but the verification email could not be delivered. Confirm the email address and resend the setup instructions.',
                 );
         }
 
@@ -307,7 +309,7 @@ final class StaffManagementController extends Controller
             ->route('admin.staff.index')
             ->with(
                 'status',
-                'Staff account created in Pending status. Setup instructions were sent.',
+                'Staff account updated successfully.',
             );
     }
 

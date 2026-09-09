@@ -175,6 +175,95 @@ final class StaffManagementTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_changing_staff_email_clears_existing_email_verification(): void
+    {
+        Notification::fake();
+
+        $administrator = $this->administrator();
+        $staff = $this->staffMember();
+
+        $staff->email_verified_at = now();
+        $staff->save();
+
+        $this->assertNotNull(
+            $staff->fresh()->email_verified_at,
+        );
+
+        $this->actingAs($administrator)
+            ->put(route('admin.staff.update', $staff), [
+                'name' => $staff->name,
+                'email' => 'new-staff-email@example.com',
+                'department_id' =>
+                $staff->staffProfile->department_id,
+                'phone' =>
+                $staff->staffProfile->phone,
+                'job_title' =>
+                $staff->staffProfile->job_title,
+                'employment_date' =>
+                $staff->staffProfile->employment_date
+                    ?->toDateString(),
+                'roles' => [
+                    RoleName::SalesOfficer->value,
+                ],
+            ])
+            ->assertRedirect(route('admin.staff.index'));
+
+        $staff->refresh();
+
+        $this->assertSame(
+            'new-staff-email@example.com',
+            $staff->email,
+        );
+
+        $this->assertNull(
+            $staff->email_verified_at,
+        );
+
+        Notification::assertSentTo(
+            $staff,
+            VerifyEmail::class,
+        );
+    }
+
+    public function test_system_administrator_role_cannot_be_assigned_when_updating_staff(): void
+    {
+        $administrator = $this->administrator();
+        $staff = $this->staffMember();
+
+        $this->actingAs($administrator)
+            ->put(route('admin.staff.update', $staff), [
+                'name' => $staff->name,
+                'email' => $staff->email,
+                'department_id' =>
+                $staff->staffProfile->department_id,
+                'phone' =>
+                $staff->staffProfile->phone,
+                'job_title' =>
+                $staff->staffProfile->job_title,
+                'employment_date' =>
+                $staff->staffProfile->employment_date
+                    ?->toDateString(),
+                'roles' => [
+                    RoleName::SystemAdministrator->value,
+                ],
+            ])
+            ->assertSessionHasErrors('roles.0');
+
+        $staff->refresh();
+
+        $this->assertFalse(
+            $staff->hasRole(
+                RoleName::SystemAdministrator->value,
+            ),
+        );
+
+        $this->assertTrue(
+            $staff->hasRole(
+                RoleName::SalesOfficer->value,
+            ),
+        );
+    }
+
     private function administrator(): User
     {
         $administrator = User::factory()->create([

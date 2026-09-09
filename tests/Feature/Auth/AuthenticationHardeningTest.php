@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Auth;
 
+use Illuminate\Support\Facades\Session;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Enums\AccountStatus;
 use App\Enums\AccountType;
@@ -234,6 +235,80 @@ final class AuthenticationHardeningTest extends TestCase
             ->assertRedirect(
                 route('access.status'),
             );
+    }
+
+    public function test_successful_login_regenerates_session_id(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'session-fixation@example.com',
+            'password' => 'Correct-Horse-Battery-7',
+            'account_type' => AccountType::Customer->value,
+            'account_status' => AccountStatus::Active->value,
+            'email_verified_at' => now(),
+        ]);
+
+        Session::start();
+
+        $oldSessionId = Session::getId();
+
+        $this->post(
+            route('login.store'),
+            [
+                'email' => $user->email,
+                'password' => 'Correct-Horse-Battery-7',
+            ],
+        );
+
+        $this->assertAuthenticatedAs($user);
+
+        $this->assertNotSame(
+            $oldSessionId,
+            Session::getId(),
+            'The session ID must be regenerated after login.',
+        );
+    }
+
+    public function test_logout_invalidates_authenticated_session(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'logout-security@example.com',
+            'password' => 'Correct-Horse-Battery-7',
+            'account_type' => AccountType::Customer->value,
+            'account_status' => AccountStatus::Active->value,
+            'email_verified_at' => now(),
+        ]);
+
+        $this->post(
+            route('login.store'),
+            [
+                'email' => $user->email,
+                'password' => 'Correct-Horse-Battery-7',
+            ],
+        );
+
+        $this->assertAuthenticatedAs($user);
+
+        Session::put(
+            'security_test_marker',
+            'must-disappear-after-logout',
+        );
+
+        $tokenBeforeLogout = Session::token();
+
+        $this->post(route('logout'))
+            ->assertRedirect();
+
+        $this->assertGuest();
+
+        $this->assertFalse(
+            Session::has('security_test_marker'),
+        );
+
+        $this->assertNotSame(
+            $tokenBeforeLogout,
+            Session::token(),
+            'The CSRF token must be regenerated after logout.',
+        );
     }
 
     public function test_two_factor_limiter_is_connected(): void

@@ -5,11 +5,9 @@
 @section('content')
     @php
         $selectedStatus = $selectedHouse
-            ? (
-                $selectedHouse->status instanceof \BackedEnum
-                    ? $selectedHouse->status->value
-                    : (string) $selectedHouse->status
-            )
+            ? ($selectedHouse->status instanceof \BackedEnum
+                ? $selectedHouse->status->value
+                : (string) $selectedHouse->status)
             : null;
     @endphp
 
@@ -32,36 +30,20 @@
 
     <section class="bg-stone-100">
         <div class="mx-auto max-w-7xl px-6 py-10 lg:px-8">
-            <form
-                method="GET"
-                action="{{ route('estate.layout') }}"
-                class="grid gap-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm md:grid-cols-4"
-            >
+            <form method="GET" action="{{ route('estate.layout') }}"
+                class="grid gap-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm md:grid-cols-4">
                 <div>
-                    <label
-                        for="phase"
-                        class="mb-2 block text-sm font-semibold"
-                    >
+                    <label for="phase" class="mb-2 block text-sm font-semibold">
                         Development phase
                     </label>
 
-                    <select
-                        id="phase"
-                        name="phase"
-                        class="w-full rounded-xl border border-stone-300 px-4 py-3"
-                    >
+                    <select id="phase" name="phase" class="w-full rounded-xl border border-stone-300 px-4 py-3">
                         <option value="">
                             All phases
                         </option>
 
                         @foreach ($phases as $phase)
-                            <option
-                                value="{{ $phase->id }}"
-                                @selected(
-                                    (string) request('phase')
-                                    === (string) $phase->id
-                                )
-                            >
+                            <option value="{{ $phase->id }}" @selected((string) request('phase') === (string) $phase->id)>
                                 {{ $phase->name }}
                             </option>
                         @endforeach
@@ -69,30 +51,17 @@
                 </div>
 
                 <div>
-                    <label
-                        for="type"
-                        class="mb-2 block text-sm font-semibold"
-                    >
+                    <label for="type" class="mb-2 block text-sm font-semibold">
                         House type
                     </label>
 
-                    <select
-                        id="type"
-                        name="type"
-                        class="w-full rounded-xl border border-stone-300 px-4 py-3"
-                    >
+                    <select id="type" name="type" class="w-full rounded-xl border border-stone-300 px-4 py-3">
                         <option value="">
                             All house types
                         </option>
 
                         @foreach ($houseTypes as $houseType)
-                            <option
-                                value="{{ $houseType->id }}"
-                                @selected(
-                                    (string) request('type')
-                                    === (string) $houseType->id
-                                )
-                            >
+                            <option value="{{ $houseType->id }}" @selected((string) request('type') === (string) $houseType->id)>
                                 {{ $houseType->name }}
                             </option>
                         @endforeach
@@ -100,27 +69,17 @@
                 </div>
 
                 <div>
-                    <label
-                        for="status"
-                        class="mb-2 block text-sm font-semibold"
-                    >
+                    <label for="status" class="mb-2 block text-sm font-semibold">
                         Property status
                     </label>
 
-                    <select
-                        id="status"
-                        name="status"
-                        class="w-full rounded-xl border border-stone-300 px-4 py-3"
-                    >
+                    <select id="status" name="status" class="w-full rounded-xl border border-stone-300 px-4 py-3">
                         <option value="">
                             All statuses
                         </option>
 
                         @foreach ($statusOptions as $status)
-                            <option
-                                value="{{ $status->value }}"
-                                @selected(request('status') === $status->value)
-                            >
+                            <option value="{{ $status->value }}" @selected(request('status') === $status->value)>
                                 {{ str($status->value)->headline() }}
                             </option>
                         @endforeach
@@ -128,17 +87,13 @@
                 </div>
 
                 <div class="flex items-end gap-3">
-                    <button
-                        type="submit"
-                        class="flex-1 rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white transition hover:bg-emerald-800"
-                    >
+                    <button type="submit"
+                        class="flex-1 rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white transition hover:bg-emerald-800">
                         Apply filters
                     </button>
 
-                    <a
-                        href="{{ route('estate.layout') }}"
-                        class="rounded-xl border border-stone-300 px-4 py-3 font-bold transition hover:bg-stone-100"
-                    >
+                    <a href="{{ route('estate.layout') }}"
+                        class="rounded-xl border border-stone-300 px-4 py-3 font-bold transition hover:bg-stone-100">
                         Clear
                     </a>
                 </div>
@@ -146,10 +101,9 @@
 
             <div class="mt-7 flex flex-wrap gap-3">
                 @foreach ($statusPresentation as $statusValue => $presentation)
-                    <div class="flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-semibold shadow-sm">
-                        <span
-                            class="h-3 w-3 rounded-full {{ $presentation['class'] }}"
-                        ></span>
+                    <div
+                        class="flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-semibold shadow-sm">
+                        <span class="h-3 w-3 rounded-full {{ $presentation['class'] }}"></span>
 
                         <span>
                             {{ $presentation['label'] }}
@@ -182,13 +136,11 @@
                     </div>
 
                     <div class="overflow-auto p-5">
-                        <div
-                            class="relative min-h-[620px] min-w-[820px] overflow-hidden rounded-2xl border border-stone-300 bg-emerald-50"
+                        <div class="relative min-h-[620px] min-w-[820px] overflow-hidden rounded-2xl border border-stone-300 bg-emerald-50"
                             style="background-image:
                                 linear-gradient(rgba(120,113,108,.12) 1px, transparent 1px),
                                 linear-gradient(90deg, rgba(120,113,108,.12) 1px, transparent 1px);
-                                background-size: 40px 40px;"
-                        >
+                                background-size: 40px 40px;">
                             <div class="absolute inset-x-[8%] top-[46%] h-14 rounded-full bg-stone-300"></div>
 
                             <div class="absolute bottom-[8%] top-[8%] left-[47%] w-14 rounded-full bg-stone-300"></div>
@@ -205,41 +157,30 @@
 
                             @forelse ($houses as $house)
                                 @php
-                                    $statusValue = $house->status instanceof \BackedEnum
-                                        ? $house->status->value
-                                        : (string) $house->status;
+                                    $statusValue =
+                                        $house->status instanceof \BackedEnum
+                                            ? $house->status->value
+                                            : (string) $house->status;
 
-                                    $presentation = $statusPresentation[$statusValue]
-                                        ?? [
-                                            'label' => str($statusValue)->headline(),
-                                            'class' => 'bg-stone-600 ring-stone-300',
-                                        ];
+                                    $presentation = $statusPresentation[$statusValue] ?? [
+                                        'label' => str($statusValue)->headline(),
+                                        'class' => 'bg-stone-600 ring-stone-300',
+                                    ];
 
-                                    $left = min(
-                                        96,
-                                        max(4, (float) $house->layout_x),
-                                    );
+                                    $left = min(96, max(4, (float) $house->layout_x));
 
-                                    $top = min(
-                                        94,
-                                        max(6, (float) $house->layout_y),
-                                    );
+                                    $top = min(94, max(6, (float) $house->layout_y));
                                 @endphp
 
-                                <button
-                                    type="button"
-                                    data-layout-house
-                                    data-code="{{ $house->property_code }}"
-                                    data-name="{{ $house->name }}"
-                                    data-status="{{ $presentation['label'] }}"
+                                <button type="button" data-layout-house data-code="{{ $house->property_code }}"
+                                    data-name="{{ $house->name }}" data-status="{{ $presentation['label'] }}"
                                     data-phase="{{ $house->estatePhase?->name ?? 'Not assigned' }}"
                                     data-type="{{ $house->houseType?->name ?? 'Not assigned' }}"
                                     data-price="₦{{ number_format($house->effectivePrice(), 2) }}"
                                     data-url="{{ route('properties.show', $house) }}"
                                     title="{{ $house->property_code }} — {{ $presentation['label'] }}"
                                     class="absolute flex h-11 min-w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl px-2 text-xs font-bold text-white shadow-lg ring-4 transition hover:z-20 hover:scale-110 focus:z-20 focus:outline-none focus:ring-4 {{ $presentation['class'] }}"
-                                    style="left: {{ $left }}%; top: {{ $top }}%;"
-                                >
+                                    style="left: {{ $left }}%; top: {{ $top }}%;">
                                     {{ $house->plot_number ?: $house->property_code }}
                                 </button>
                             @empty
@@ -267,17 +208,11 @@
 
                     @if ($selectedHouse)
                         <div id="layout-property-panel">
-                            <h2
-                                id="layout-property-name"
-                                class="mt-3 text-2xl font-bold"
-                            >
+                            <h2 id="layout-property-name" class="mt-3 text-2xl font-bold">
                                 {{ $selectedHouse->name }}
                             </h2>
 
-                            <p
-                                id="layout-property-code"
-                                class="mt-1 text-sm font-semibold text-stone-500"
-                            >
+                            <p id="layout-property-code" class="mt-1 text-sm font-semibold text-stone-500">
                                 {{ $selectedHouse->property_code }}
                             </p>
 
@@ -287,10 +222,7 @@
                                         Status
                                     </dt>
 
-                                    <dd
-                                        id="layout-property-status"
-                                        class="mt-1 font-bold"
-                                    >
+                                    <dd id="layout-property-status" class="mt-1 font-bold">
                                         {{ $statusPresentation[$selectedStatus]['label'] ?? str($selectedStatus)->headline() }}
                                     </dd>
                                 </div>
@@ -300,10 +232,7 @@
                                         Phase
                                     </dt>
 
-                                    <dd
-                                        id="layout-property-phase"
-                                        class="mt-1 font-bold"
-                                    >
+                                    <dd id="layout-property-phase" class="mt-1 font-bold">
                                         {{ $selectedHouse->estatePhase?->name ?? 'Not assigned' }}
                                     </dd>
                                 </div>
@@ -313,10 +242,7 @@
                                         House type
                                     </dt>
 
-                                    <dd
-                                        id="layout-property-type"
-                                        class="mt-1 font-bold"
-                                    >
+                                    <dd id="layout-property-type" class="mt-1 font-bold">
                                         {{ $selectedHouse->houseType?->name ?? 'Not assigned' }}
                                     </dd>
                                 </div>
@@ -326,20 +252,14 @@
                                         Price
                                     </dt>
 
-                                    <dd
-                                        id="layout-property-price"
-                                        class="mt-1 text-lg font-bold text-emerald-700"
-                                    >
+                                    <dd id="layout-property-price" class="mt-1 text-lg font-bold text-emerald-700">
                                         ₦{{ number_format($selectedHouse->effectivePrice(), 2) }}
                                     </dd>
                                 </div>
                             </dl>
 
-                            <a
-                                id="layout-property-link"
-                                href="{{ route('properties.show', $selectedHouse) }}"
-                                class="mt-7 flex w-full items-center justify-center rounded-xl bg-stone-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-stone-700"
-                            >
+                            <a id="layout-property-link" href="{{ route('properties.show', $selectedHouse) }}"
+                                class="mt-7 flex w-full items-center justify-center rounded-xl bg-stone-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-stone-700">
                                 View property details
                             </a>
                         </div>
@@ -354,34 +274,6 @@
     </section>
 
     @if ($selectedHouse)
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const markers = document.querySelectorAll(
-                    '[data-layout-house]',
-                );
-
-                const fields = {
-                    name: document.getElementById('layout-property-name'),
-                    code: document.getElementById('layout-property-code'),
-                    status: document.getElementById('layout-property-status'),
-                    phase: document.getElementById('layout-property-phase'),
-                    type: document.getElementById('layout-property-type'),
-                    price: document.getElementById('layout-property-price'),
-                    link: document.getElementById('layout-property-link'),
-                };
-
-                markers.forEach((marker) => {
-                    marker.addEventListener('click', () => {
-                        fields.name.textContent = marker.dataset.name;
-                        fields.code.textContent = marker.dataset.code;
-                        fields.status.textContent = marker.dataset.status;
-                        fields.phase.textContent = marker.dataset.phase;
-                        fields.type.textContent = marker.dataset.type;
-                        fields.price.textContent = marker.dataset.price;
-                        fields.link.href = marker.dataset.url;
-                    });
-                });
-            });
-        </script>
+        <script src="{{ asset('js/estate-layout.js') }}" defer></script>
     @endif
 @endsection
